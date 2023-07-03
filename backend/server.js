@@ -1,16 +1,22 @@
 require('dotenv').config()
-const mongoose = require('mongoose');
 const app = require('./app');
+const Sequelize = require("sequelize");
 
-const DB = process.env.MONGOURI || 'mongodb://127.0.0.1:27017/todo';
+const sequelize = new Sequelize(
+ 'users_db',
+ 'root',
+ 'root',
+  {
+    host: 'localhost',
+    dialect: 'mysql'
+  }
+);
 
-mongoose.connect(DB, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-    useUnifiedTopology: true
-    })
-    .then(() => console.log('[+] DB Connected'));
+sequelize.authenticate().then(() => {
+   console.log('Connection has been established successfully.');
+}).catch((error) => {
+   console.error('Unable to connect to the database: ', error);
+});
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {

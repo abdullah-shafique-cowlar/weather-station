@@ -22,7 +22,6 @@ app.use(helmet()); // Helmet helps you secure your Express apps by setting vario
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(mongoSanitize()); // Data sanitization against NoSQL query injection
 
 //calling the routers
 app.use('/api/v1', apiRouterV1);
