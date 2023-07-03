@@ -4,6 +4,7 @@ const Models = require("../../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const jwtVerify = require('../../middlewares/jwtVerify')
 const User = Models.User;
 dotenv.config();
 
@@ -46,17 +47,7 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-router.get('/me', async(req,res,next)=>{
-  try {
-    let token = req.headers['authorization'].split(" ")[1];
-    let decoded = jwt.verify(token,process.env.SECRET);
-    req.user = decoded;
-    next();
-  } catch(err){
-    res.status(401).json({"msg":"Couldnt Authenticate"});
-  }
-  },
-  async(req,res,next)=>{
+router.get('/me', jwtVerify, async(req,res,next)=>{
     let user = await User.findOne({where:{id : req.user.id},attributes:{exclude:["password"]}});
     if(user === null){
       res.status(404).json({'msg':"User not found"});
