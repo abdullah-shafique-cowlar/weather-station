@@ -68,12 +68,28 @@ router.get("/me", jwtVerify, async (req, res, next) => {
   res.status(200).json(user);
 });
 
+// GET all data and number of data points by limit
 router.get("/alldata/:limit?", async (req, res, next) => {
   try {
     const limit = req.params.limit || 0
     const result = await influx_client.query(`
         select * from weather_data
         limit ${limit}
+    `);
+    console.table(result);
+    res.send(result)
+  } catch (error) {
+    console.log("Error");
+  }
+});
+
+//GET all data between timestamps
+router.get("/duration_data/", async (req, res, next) => {
+  try {
+    const { startTime, endTime } = req.body;
+    const result = await influx_client.query(`
+        select * from weather_data
+        where time>='${startTime}' AND time<='${endTime}'
     `);
     console.table(result);
     res.send(result)
