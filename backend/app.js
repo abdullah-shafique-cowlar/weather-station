@@ -4,9 +4,13 @@ require("dotenv").config();
 const helmet = require("helmet");
 const cors = require("cors");
 const influx_client = require("./config/db.utils").getClient();
+const client = require('./config/mqtt.utils')
+client.connect();
+mqttClient = client.getClient()
 
 // importing the router
 var apiRouterV1 = require("./routes/v1/api");
+const mqttUtils = require("./config/mqtt.utils");
 
 var app = express();
 
@@ -24,34 +28,19 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const mqtt = require("mqtt");
-const client = mqtt.connect("mqtt://broker.hivemq.com");
-const topicName = "Weather_Data";
-
-// connect to same client and subscribe to same topic name
-client.on("connect", () => {
-  // can also accept objects in the form {'topic': qos}
-  client.subscribe(topicName, { qos: 2 }, (err, granted) => {
-    if (err) {
-      console.log(err, "err");
-    }
-    console.log(granted, "granted");
-  });
-});
-
 // on receive message event, log the message to the console
-client.on("message", async (topic, message, packet) => {
+mqttClient.on("message", async (topic, message, packet) => {
   //   console.log(packet, packet.payload.toString());
   if (packet.retain === true) {
-    console.log("Received retained message. Skipping write to the database.");
+    // console.debug("Received retained message. Skipping write to the database.");
     return;
   }
   if (topic === topicName) {
     const payload = JSON.parse(message);
     const temperature = payload.temperature;
     const humidity = payload.humidity;
-    console.log("Temperature:", temperature);
-    console.log("Humidity:", humidity);
+    console.debug("Temperature:", temperature);
+    console.debug("Humidity:", humidity);
 
     // write to influx db on weather_data measurement
     try {
@@ -62,9 +51,9 @@ client.on("message", async (topic, message, packet) => {
       };
 
       await influx_client.writePoints([dataPoint]);
-      console.log("[+] Point Written: ", dataPoint);
+        console.log("[+] Point Written: ", dataPoint);
     } catch (error) {
-      console.log("[-] Error: ", error);
+        console.log("[-] Error: ", error);
     }
   }
 });

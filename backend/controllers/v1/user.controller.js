@@ -2,19 +2,41 @@ const Models = require("../../models");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const User = Models.User;
+const bcrypt = require('bcrypt')
 const influx_client = require("../../config/db.utils").getClient();
 dotenv.config();
 
 exports.register = async (req, res, next) => {
-  const salt = await bcrypt.genSalt(10);
-  var usr = {
-    user_name: req.body.user_name,
-    email: req.body.email,
-    password: await bcrypt.hash(req.body.password, salt),
-  };
-  created_user = await User.create(usr);
-  res.status(201).json(created_user);
+  try {
+    const { user_name, email, password } = req.body;
+
+    // Check if user_name or email already exist
+    const existingUser = await User.findOne({
+      $or: [{ user_name }, { email }],
+    });
+
+    if (existingUser) {
+      // User or email already exists
+      return res.status(400).json({ error: 'User or email already exists' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = {
+      user_name,
+      email,
+      password: hashedPassword,
+    };
+
+    const createdUser = await User.create(newUser);
+    res.status(201).json(createdUser);
+  } catch (error) {
+    console.log("Error:", error);
+    res.status(500).json({ error: "An error occurred" });
+  }
 };
+
 
 exports.login = async (req, res, next) => {
   const user = await User.findOne({ where: { email: req.body.email } });

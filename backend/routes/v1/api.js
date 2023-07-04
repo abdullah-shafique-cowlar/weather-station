@@ -12,10 +12,13 @@ router.get("/", async function (req, res, next) {
   res.send("respond with a resource");
 });
 
+// POST user register using username, email and password
 router.post("/register", userController.register);
 
+// POST user login using email and password 
 router.post("/login", userController.login);
 
+// GET user's profile
 router.get("/me", jwtVerify, userController.profile);
 
 // GET all data and number of data points by limit
