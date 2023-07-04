@@ -1,5 +1,4 @@
 const influx = require('influx')
-const _ = require('lodash')
 
 const client = new influx.InfluxDB({
     database: process.env.INFLUX_DATABASE,

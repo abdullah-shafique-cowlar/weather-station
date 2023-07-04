@@ -1,50 +1,49 @@
-const db = require('../../model');
-const User = db.users;
-const Op = db.Sequelize.Op;
+const Models = require("../../models");
+const dotenv = require("dotenv");
+const jwt = require("jsonwebtoken");
+const User = Models.User;
+const influx_client = require("../../config/db.utils").getClient();
+dotenv.config();
 
-// Create and Save a new Tutorial
-exports.create = (req, res) => {
-  if (!req.body.first_name) {
-    res.status(400).send({
-      message: "Content can not be empty!",
-    });
-    return;
-  }
-
-  // Create a Tutorial
-  const userObj = {
-    first_name: req.body.first_name,
-    last_name: req.body.last_name,
-    age: req.body.age
+exports.register = async (req, res, next) => {
+  const salt = await bcrypt.genSalt(10);
+  var usr = {
+    user_name: req.body.user_name,
+    email: req.body.email,
+    password: await bcrypt.hash(req.body.password, salt),
   };
-
-  // Save Tutorial in the database
-  User.create(userObj)
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while creating the Tutorial.",
-      });
-    });
+  created_user = await User.create(usr);
+  res.status(201).json(created_user);
 };
 
-// Retrieve all Tutorials from the database.
-exports.findAll = (req, res) => {};
+exports.login = async (req, res, next) => {
+  const user = await User.findOne({ where: { email: req.body.email } });
+  if (user) {
+    const password_valid = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
+    if (password_valid) {
+      token = jwt.sign(
+        { id: user.id, email: user.email, username: user.user_name },
+        process.env.SECRET
+      );
+      res.status(200).json({ token: token });
+    } else {
+      res.status(400).json({ error: "Password Incorrect" });
+    }
+  } else {
+    res.status(404).json({ error: "User does not exist" });
+  }
+}
 
-// Find a single Tutorial with an id
-exports.findOne = (req, res) => {};
-
-// Update a Tutorial by the id in the request
-exports.update = (req, res) => {};
-
-// Delete a Tutorial with the specified id in the request
-exports.delete = (req, res) => {};
-
-// Delete all Tutorials from the database.
-exports.deleteAll = (req, res) => {};
-
-// Find all published Tutorials
-exports.findAllPublished = (req, res) => {};
+exports.profile = async (req, res, next) => {
+  let user = await User.findOne({
+    where: { id: req.user.id },
+    attributes: { exclude: ["password"] },
+  });
+  if (user === null) {
+    res.status(404).json({ msg: "User not found" });
+  }
+  res.status(200).json(user);
+}
