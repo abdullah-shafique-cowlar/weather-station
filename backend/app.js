@@ -5,12 +5,12 @@ const helmet = require("helmet");
 const cors = require("cors");
 const influx_client = require("./config/db.utils").getClient();
 const client = require('./config/mqtt.utils')
+
 client.connect();
 mqttClient = client.getClient()
 
 // importing the router
 var apiRouterV1 = require("./routes/v1/api");
-const mqttUtils = require("./config/mqtt.utils");
 
 var app = express();
 
@@ -35,7 +35,7 @@ mqttClient.on("message", async (topic, message, packet) => {
     // console.debug("Received retained message. Skipping write to the database.");
     return;
   }
-  if (topic === topicName) {
+  if (topic === client.topicName) {
     const payload = JSON.parse(message);
     const temperature = payload.temperature;
     const humidity = payload.humidity;

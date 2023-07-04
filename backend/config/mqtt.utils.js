@@ -2,7 +2,7 @@ const mqtt = require('mqtt');
 const topicName = 'Weather_Data';
 
 let client;
-
+// mqtt://test.mosquitto.org/
 function connect() {
   client = mqtt.connect('mqtt://broker.hivemq.com');
 
@@ -12,11 +12,6 @@ function connect() {
         console.error(err);
       }
     });
-  });
-
-  client.on('message', async (topic, message, packet) => {
-    // Message handling logic
-    // ...
   });
 }
 
@@ -30,4 +25,5 @@ module.exports = {
   connect,
   disconnect,
   getClient: () => client,
+  topicName
 };

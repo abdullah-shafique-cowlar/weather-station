@@ -4,7 +4,7 @@ import time
 import json
 
 mqttBroker = "broker.hivemq.com"
-client = mqtt.Client("Test")
+client = mqtt.Client("Test1")
 client.connect(mqttBroker)
 
 while True:
