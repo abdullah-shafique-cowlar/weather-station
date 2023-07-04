@@ -4,12 +4,22 @@ const Models = require("../../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
-const jwtVerify = require('../../middlewares/jwtVerify')
+const jwtVerify = require("../../middlewares/jwtVerify");
 const User = Models.User;
+const influx_client = require("../../config/db.utils").getClient();
 dotenv.config();
 
 /* GET users listing. */
-router.get("/", function (req, res, next) {
+router.get("/", async function (req, res, next) {
+  try {
+    const result = await influx_client.query(`
+        select * from login_info
+        limit 10
+    `);
+    console.table(result);
+  } catch (error) {
+    console.log("Error");
+  }
   res.send("respond with a resource");
 });
 
@@ -47,12 +57,29 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-router.get('/me', jwtVerify, async(req,res,next)=>{
-    let user = await User.findOne({where:{id : req.user.id},attributes:{exclude:["password"]}});
-    if(user === null){
-      res.status(404).json({'msg':"User not found"});
-    }
-    res.status(200).json(user);
+router.get("/me", jwtVerify, async (req, res, next) => {
+  let user = await User.findOne({
+    where: { id: req.user.id },
+    attributes: { exclude: ["password"] },
+  });
+  if (user === null) {
+    res.status(404).json({ msg: "User not found" });
+  }
+  res.status(200).json(user);
+});
+
+router.get("/alldata/:limit?", async (req, res, next) => {
+  try {
+    const limit = req.params.limit || 0
+    const result = await influx_client.query(`
+        select * from weather_data
+        limit ${limit}
+    `);
+    console.table(result);
+    res.send(result)
+  } catch (error) {
+    console.log("Error");
+  }
 });
 
 module.exports = router;
