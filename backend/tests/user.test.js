@@ -136,3 +136,53 @@ describe('Login', () => {
     expect(response.body).toHaveProperty('error', 'User does not exist');
   });
 });
+
+describe('Profile', () => {
+  let server;
+  let token;
+
+  beforeAll(async () => {
+    // Create a new user and obtain the token for authentication
+    const user = {
+      user_name: 'testuser',
+      email: 'test@example.com',
+      password: bcrypt.hashSync('password', 10),
+    };
+
+    await User.create(user);
+
+    const response = await request(app)
+      .post('/api/v1/login')
+      .send({ email: 'test@example.com', password: 'password' })
+      .expect(200);
+
+    token = response.body.token;
+  });
+
+  beforeEach(() => {
+    server = app.listen();
+  });
+
+  afterEach(() => {
+    server.close();
+  });
+
+  it('should return the profile of the authenticated user', async () => {
+    const response = await request(server)
+      .get('/api/v1/me')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(response.body).toHaveProperty('user_name', 'testuser');
+    expect(response.body).toHaveProperty('email', 'test@example.com');
+    expect(response.body).not.toHaveProperty('password');
+  });
+
+  it('should return an error if the user is not authenticated', async () => {
+    const response = await request(server)
+      .get('/api/v1/me')
+      .expect(401);
+
+    expect(response.body).toEqual({ msg: 'Couldnt Authenticate' });
+  });
+});
