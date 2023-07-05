@@ -1,8 +1,9 @@
 require('dotenv').config()
 const db = require("./models");
 const app = require('./app');
+const config = require('./config/env.config')
 
-const port = process.env.PORT || 3000;
+const port = config.port;
 const server = app.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });
@@ -22,3 +23,8 @@ process.on('SIGTERM', () => {
     console.log('[-] Server closed');
   });
 });
+
+process.on('uncaughtException', function(err) {
+  console.log(err)
+  process.exit(1);
+})
