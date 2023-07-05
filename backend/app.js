@@ -51,7 +51,7 @@ mqttClient.on("message", async (topic, message, packet) => {
       };
 
       await influx_client.writePoints([dataPoint]);
-        console.log("[+] Point Written: ", dataPoint);
+      console.log("[+] Point Written: ", dataPoint);
     } catch (error) {
         console.log("[-] Error: ", error);
     }

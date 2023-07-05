@@ -3,12 +3,12 @@
       "INFLUXDB_USERNAME": "root",
       "INFLUXDB_PASS": "root",
       "INFLUX_DATABASE": "weather_dev",
-      "INFLUXDB_HOST": "127.0.0.1"
+      "INFLUXDB_HOST": "localhost"
     },
     "test": {
       "INFLUXDB_USERNAME": "root",
       "INFLUXDB_PASS": "root",
       "INFLUX_DATABASE": "weather_test",
-      "INFLUXDB_HOST": "127.0.0.1"
+      "INFLUXDB_HOST": "localhost"
     }
 }
