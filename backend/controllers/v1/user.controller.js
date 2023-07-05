@@ -13,7 +13,9 @@ exports.register = async (req, res, next) => {
 
     // Check if user_name or email already exist
     const existingUser = await User.findOne({
-      [Op.or]: [{ user_name }, { email }],
+      where: {
+        [Op.or]: [{ user_name }, { email }],
+      }
     });
 
     if (existingUser) {

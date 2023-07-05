@@ -4,6 +4,8 @@ const dotenv = require("dotenv");
 const jwtVerify = require("../../middlewares/jwtVerify");
 const userController = require('../../controllers/v1/user.controller')
 const sensorController = require('../../controllers/v1/sensor.controller')
+const validator = require('../../middlewares/validatator')
+const userSchema = require('../../schemas/user.schema')
 dotenv.config();
 
 /* GET users listing. */
@@ -11,11 +13,13 @@ router.get("/", async function (req, res, next) {
   res.send("respond with a resource");
 });
 
+// Add validation middleware
+
 // POST user register using username, email and password
-router.post("/register", userController.register);
+router.post("/register", validator(userSchema.registration) ,userController.register);
 
 // POST user login using email and password 
-router.post("/login", userController.login);
+router.post("/login", validator(userSchema.login), userController.login);
 
 // GET user's profile
 router.get("/me", jwtVerify, userController.profile);
