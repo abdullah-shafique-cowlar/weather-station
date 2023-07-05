@@ -1,10 +1,6 @@
 const influx_client = require("../../config/db.utils").getClient();
-const env = process.env.NODE_ENV || "development"
-let measurement = 'weather_data'
-
-if(env == 'test') {
-  measurement = 'test_measurement'
-}
+const config = require('../../config/env.config')
+const measurement = config.influxdb.measurement
 
 exports.getAllData = async (req, res, next) => {
   try {

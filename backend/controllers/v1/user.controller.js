@@ -1,14 +1,12 @@
 const Models = require("../../models");
-const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const User = Models.User;
 const bcrypt = require('bcrypt')
 const { Op } = require('sequelize')
-dotenv.config();
+const config = require('../../config/env.config')
 
 exports.register = async (req, res, next) => {
   try {
-    // TODO: Email Regex - JOI library
     const { user_name, email, password } = req.body;
 
     // Check if user_name or email already exist
@@ -51,7 +49,7 @@ exports.login = async (req, res, next) => {
     if (password_valid) {
       token = jwt.sign(
         { id: user.id, email: user.email, username: user.user_name },
-        process.env.SECRET
+        config.secret
       );
       res.status(200).json({ token: token });
     } else {
