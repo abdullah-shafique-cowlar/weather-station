@@ -25,6 +25,6 @@ router.get("/me", jwtVerify, userController.profile);
 router.get("/alldata/:limit?", sensorController.getAllData);
 
 //GET all data between timestamps
-router.get("/duration_data/", sensorController.durationData);
+router.post("/duration_data/", sensorController.durationData);
 
 module.exports = router;
