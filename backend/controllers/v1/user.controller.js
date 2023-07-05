@@ -3,16 +3,17 @@ const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const User = Models.User;
 const bcrypt = require('bcrypt')
-const influx_client = require("../../config/db.utils").getClient();
+const { Op } = require('sequelize')
 dotenv.config();
 
 exports.register = async (req, res, next) => {
   try {
+    // TODO: Email Regex - JOI library
     const { user_name, email, password } = req.body;
 
     // Check if user_name or email already exist
     const existingUser = await User.findOne({
-      $or: [{ user_name }, { email }],
+      [Op.or]: [{ user_name }, { email }],
     });
 
     if (existingUser) {
