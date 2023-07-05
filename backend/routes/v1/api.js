@@ -2,7 +2,6 @@ var express = require("express");
 var router = express.Router();
 const dotenv = require("dotenv");
 const jwtVerify = require("../../middlewares/jwtVerify");
-const influx_client = require("../../config/db.utils").getClient();
 const userController = require('../../controllers/v1/user.controller')
 const sensorController = require('../../controllers/v1/sensor.controller')
 dotenv.config();

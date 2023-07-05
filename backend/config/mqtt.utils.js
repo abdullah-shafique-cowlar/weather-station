@@ -2,7 +2,7 @@ const mqtt = require('mqtt');
 const topicName = 'Weather_Data';
 
 let client;
-// mqtt://test.mosquitto.org/
+// Another free public broker server address: mqtt://test.mosquitto.org/
 function connect() {
   client = mqtt.connect('mqtt://broker.hivemq.com');
 
