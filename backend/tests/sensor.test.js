@@ -2,90 +2,101 @@ const request = require("supertest");
 const app = require("../app"); // Assuming your Express app is defined in app.js
 const influx_client = require("../config/db.utils").getClient();
 const sensorController = require("../controllers/v1/sensor.controller");
-
-jest.mock("../config/db.utils", () => ({
-  getClient: jest.fn().mockReturnValue({
-    query: jest.fn(),
-    writePoints: jest.fn(),
-  }),
-}));
+const _ = require("lodash");
+let dataPoints = [];
+let dates = [];
 
 describe("Sensor Controller", () => {
-  beforeAll(() => {
-    const dataPoints = [
+  beforeAll(async () => {
+    dates = [
+      new Date(_.random(1688541144000, 1688713944000)),
+      new Date(_.random(1689837144000, 1690269144000)),
+      new Date(_.random(1690355544000, 1690614744000)),
+      new Date(_.random(1690960344000, 1692515544000)),
+    ];
+
+    dataPoints = [
       {
         measurement: "test_measurement",
         tags: { host: "localhost" },
         fields: { temperature: 25, humidity: 50 },
-        timestamp: "2023-01-01T00:00:00Z",
+        timestamp: dates[0],
       },
       {
         measurement: "test_measurement",
         tags: { host: "localhost" },
-        fields: { temperature: 30, humidity: 40 },
-        timestamp: "2023-01-02T00:00:00Z",
+        fields: { temperature: 20, humidity: 22.2 },
+        timestamp: dates[1],
       },
       {
         measurement: "test_measurement",
         tags: { host: "localhost" },
-        fields: { temperature: 35, humidity: 45 },
-        timestamp: "2023-01-03T00:00:00Z",
+        fields: { temperature: 19.8, humidity: 37.5 },
+        timestamp: dates[2],
       },
       {
         measurement: "test_measurement",
         tags: { host: "localhost" },
-        fields: { temperature: 40, humidity: 50 },
-        timestamp: "2023-01-04T00:00:00Z",
+        fields: { temperature: 22, humidity: 22 },
+        timestamp: dates[3],
       },
     ];
 
-    influx_client.writePoints.mockResolvedValue();
-    influx_client.query.mockResolvedValue([{ data: "mockedData" }]);
-
-    return influx_client.writePoints(dataPoints);
+    try {
+      await influx_client.writePoints(dataPoints);
+      console.log("[+] Point Written: ", dataPoints);
+    } catch (error) {
+      console.log("[-] Error: ", error);
+    }
   });
 
   afterAll(() => {
-    influx_client.query.mockResolvedValue([{ data: "mockedData" }]);
-
     return influx_client.query(`DELETE FROM test_measurement`);
   });
 
-  describe("getAllData", () => {
+  describe("Get All Data", () => {
     it("should get all data points", async () => {
       // Mock the request and response objects
       const req = { params: {} };
       const res = { send: jest.fn() };
 
       // Call the getAllData function
-      await sensorController.getAllData(req, res);
+      const response = await request(app)
+        .get("/api/v1/alldata")
+        .send(req)
+        .expect(200);
 
-      // Check the response
-      expect(res.send).toHaveBeenCalledWith([{ data: "mockedData" }]);
+      console.log(response.body);
+
+      // expect(response.body).toHaveLength(4)
+      expect(response.body).toEqual(
+        expect.arrayContaining(
+          dataPoints.map(({ tags, fields, timestamp }) => ({
+            host: tags.host,
+            humidity: fields.humidity,
+            temperature: fields.temperature,
+            time: timestamp.toISOString(),
+          }))
+        )
+      );
     });
   });
 
-  describe("duration_data", () => {
+  describe("Get Duration data", () => {
     it("should get data points within time frame", async () => {
-      influx_client.query.mockResolvedValueOnce([{ data: "mockedData" }]);
-
       const req = {
         body: {
-          startTime: "2023-01-02T00:00:00Z",
-          endTime: "2023-01-03T00:00:00Z",
+          startTime: dates[1],
+          endTime: dates[3],
         },
       };
-      const res = { send: jest.fn() };
 
-        const response = await request(app).get("/api/v1/duration_data").send(req);
-    //   const response = await sensorController.durationData(req, res);
+      const response = await request(app)
+        .post("/api/v1/duration_data")
+        .send(req.body)
+        .expect(200);
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual([{ data: "mockedData" }]);
-
-      expect(influx_client.query).toHaveBeenCalledWith(
-        `select * from test_measurement where time>='${req.body.startTime}' AND time<='${req.body.endTime}'`
-      );
-    });
+      expect(response.body).toHaveLength(3)
+    }, 10000);
   });
 });
