@@ -49,7 +49,8 @@ exports.login = async (req, res, next) => {
     if (password_valid) {
       token = jwt.sign(
         { id: user.id, email: user.email, username: user.user_name },
-        config.secret
+        config.secret,
+        { expiresIn: "24h" }
       );
 
       res.cookie('jwt', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
