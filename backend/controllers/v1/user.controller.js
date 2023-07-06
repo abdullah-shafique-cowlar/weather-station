@@ -51,7 +51,9 @@ exports.login = async (req, res, next) => {
         { id: user.id, email: user.email, username: user.user_name },
         config.secret
       );
-      res.status(200).json({ token: token });
+
+      res.cookie('jwt', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+      res.status(200).json({ message: "login success" });
     } else {
       res.status(400).json({ error: "Password Incorrect" });
     }
