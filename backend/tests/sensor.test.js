@@ -62,7 +62,7 @@ describe("Sensor Controller", () => {
 
       // Call the getAllData function
       const response = await request(app)
-        .get("/api/v1/alldata")
+        .get("/api/v1/sensor/alldata")
         .send(req)
         .expect(200);
 
@@ -92,7 +92,7 @@ describe("Sensor Controller", () => {
       };
 
       const response = await request(app)
-        .post("/api/v1/duration_data")
+        .post("/api/v1/sensor/duration-data")
         .send(req.body)
         .expect(200);
 

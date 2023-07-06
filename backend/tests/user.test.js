@@ -20,7 +20,7 @@ afterAll(async () => {
   await sequelize.close(); // Close the database connection
 });
 
-describe("POST /api/v1/register", () => {
+describe("POST /api/v1/user/register", () => {
   let server;
   beforeEach(() => {
     server = app.listen();
@@ -41,7 +41,7 @@ describe("POST /api/v1/register", () => {
 
     // Send a POST request to the /api/register endpoint
     const response = await request(server)
-      .post("/api/v1/register")
+      .post("/api/v1/user/register")
       .send(reqBody);
 
     // Assertion
@@ -63,7 +63,7 @@ describe("POST /api/v1/register", () => {
 
     // Send a POST request to the /api/register endpoint
     const response = await request(server)
-      .post("/api/v1/register")
+      .post("/api/v1/user/register")
       .send(reqBody);
 
     // Assertion
@@ -94,7 +94,7 @@ describe('Login', () => {
 
     // Send a POST request to the /api/register endpoint
     const response = await request(server)
-      .post("/api/v1/register")
+      .post("/api/v1/user/register")
       .send(reqBody);
 
     // Assertion
@@ -110,7 +110,7 @@ describe('Login', () => {
     });
   
     const response = await request(app)
-      .post('/api/v1/login')
+      .post('/api/v1/user/login')
       .send({ email: 'test@example.com', password: 'password' })
       .expect(200);
   
@@ -120,7 +120,7 @@ describe('Login', () => {
 
   it('should return an error when invalid credentials are provided', async () => {
     const response = await request(app)
-      .post('/api/v1/login')
+      .post('/api/v1/user/login')
       .send({ email: 'invalid@example.com', password: 'invalidpassword' })
       .expect(404);
 
@@ -129,7 +129,7 @@ describe('Login', () => {
 
   it('should return an error when the user does not exist', async () => {
     const response = await request(app)
-      .post('/api/v1/login')
+      .post('/api/v1/user/login')
       .send({ email: 'nonexistent@example.com', password: 'password123' })
       .expect(404);
 
@@ -152,7 +152,7 @@ describe('Profile', () => {
     await User.create(user);
 
     const response = await request(app)
-      .post('/api/v1/login')
+      .post('/api/v1/user/login')
       .send({ email: 'test@example.com', password: 'password' })
       .expect(200);
 
@@ -169,7 +169,7 @@ describe('Profile', () => {
 
   it('should return the profile of the authenticated user', async () => {
     const response = await request(server)
-      .get('/api/v1/me')
+      .get('/api/v1/user/me')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
@@ -180,7 +180,7 @@ describe('Profile', () => {
 
   it('should return an error if the user is not authenticated', async () => {
     const response = await request(server)
-      .get('/api/v1/me')
+      .get('/api/v1/user/me')
       .expect(401);
 
     expect(response.body).toEqual({ msg: 'Couldnt Authenticate' });
