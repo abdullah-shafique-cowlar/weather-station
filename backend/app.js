@@ -1,5 +1,6 @@
 var express = require("express");
 var logger = require("morgan");
+const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const influx_client = require("./config/db.utils").getClient();
 const client = require('./config/mqtt.utils')
@@ -17,12 +18,14 @@ const corsOptions = {
   origin: "http://localhost:5173",
   methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD", "DELETE", "PATCH"],
   optionsSuccessStatus: 200,
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
 app.use(logger("dev"));
+app.use(cookieParser());
 
 // On Message receive event, write to InfluxDB
 mqttClient.on("message", async (topic, message, packet) => {
