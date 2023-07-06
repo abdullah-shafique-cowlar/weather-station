@@ -53,7 +53,7 @@ exports.login = async (req, res, next) => {
       );
 
       res.cookie('jwt', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
-      res.status(200).json({ msg: "login success" });
+      res.status(200).json({ msg: "login success", token: token });
     } else {
       res.status(400).json({ error: "Password Incorrect" });
     }
