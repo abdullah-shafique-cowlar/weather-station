@@ -4,13 +4,17 @@ const app = require('./app');
 const config = require('./config/env.config')
 
 const port = config.port;
-const server = app.listen(port, () => {
-  console.log(`App running on port ${port}...`);
-});
+let server = "";
+// server = app.listen(port, () => {
+//   console.log(`App running on port ${port}...`);
+// });
 
 db.sequelize.sync()
   .then(() => {
     console.log("Synced db.");
+    server = app.listen(port, () => {
+      console.log(`App running on port ${port}...`);
+    });
   })
   .catch((err) => {
     console.log("Failed to sync db: " + err.message);
