@@ -10,7 +10,8 @@ client.connect();
 mqttClient = client.getClient()
 
 // importing the router
-var apiRouterV1 = require("./routes/v1/api");
+var UserApiRouterV1 = require("./routes/v1/user_api");
+var SensorApiRouterV1 = require("./routes/v1/sensor_api");
 
 var app = express();
 
@@ -57,7 +58,8 @@ mqttClient.on("message", async (topic, message, packet) => {
 });
 
 //calling the routers
-app.use("/api/v1", apiRouterV1);
+app.use("/api/v1/user", UserApiRouterV1);
+app.use("/api/v1/sensor", SensorApiRouterV1);
 
 app.all("*", (req, res, next) => {
   res.status(404).json({ Error: `Cant Find ${req.originalUrl}` }); // 404 Not Found
