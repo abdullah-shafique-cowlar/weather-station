@@ -53,7 +53,7 @@ exports.login = async (req, res, next) => {
       );
 
       res.cookie('jwt', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
-      res.status(200).json({ message: "login success" });
+      res.status(200).json({ msg: "login success" });
     } else {
       res.status(400).json({ error: "Password Incorrect" });
     }
@@ -75,5 +75,5 @@ exports.profile = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
   res.cookie('jwt', '', { maxAge: 0 });
-  res.status(204).json({ msg: "User logged out" });
+  res.status(200).json({ msg: "User logged out" });
 }
