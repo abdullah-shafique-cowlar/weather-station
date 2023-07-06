@@ -31,7 +31,6 @@ app.use(cookieParser());
 // On Message receive event, write to InfluxDB
 mqttClient.on("message", async (topic, message, packet) => {
   if (packet.retain === true) {
-    // console.debug("Received retained message. Skipping write to the database.");
     return;
   }
   if (topic === client.topicName) {
