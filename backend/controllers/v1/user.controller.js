@@ -70,3 +70,8 @@ exports.profile = async (req, res, next) => {
   }
   res.status(200).json(user);
 }
+
+exports.logout = async (req, res, next) => {
+  res.cookie('jwt', '', { maxAge: 0 });
+  res.status(204).json({ msg: "User logged out" });
+}

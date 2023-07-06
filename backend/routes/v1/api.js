@@ -30,4 +30,7 @@ router.get("/alldata/:limit?", sensorController.getAllData);
 //GET all data between timestamps
 router.post("/duration_data/", sensorController.durationData);
 
+// POST Logout user
+router.post("/logout", userController.logout);
+
 module.exports = router;
