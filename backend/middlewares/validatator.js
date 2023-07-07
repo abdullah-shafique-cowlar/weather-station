@@ -3,7 +3,9 @@ const Joi = require('joi');
 const validator = (schema) => {
     return async (req, res, next) => {
         try {
-            const validated = await schema.validateAsync(req.body)
+            const validated = await schema.validateAsync(req.body, {
+                abortEarly: false
+            })
             req.body = validated
             next()
         } catch (error) {
