@@ -1,13 +1,13 @@
 const request = require("supertest");
-const app = require("../app"); // Assuming your Express app is defined in app.js
+const {app, client} = require("../app"); // Assuming your Express app is defined in app.js
 const influx_client = require("../config/db.utils").getClient();
-const sensorController = require("../controllers/v1/sensor.controller");
 const _ = require("lodash");
 let dataPoints = [];
 let dates = [];
 
 describe("Sensor Controller", () => {
   beforeAll(async () => {
+    client.disconnect();
     dates = [
       new Date(_.random(1688541144000, 1688713944000)),
       new Date(_.random(1689837144000, 1690269144000)),

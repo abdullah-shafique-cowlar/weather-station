@@ -1,16 +1,14 @@
 const request = require("supertest");
-const app = require("../app"); // Assuming your Express app is defined in app.js
+const {app, client} = require("../app"); // Assuming your Express app is defined in app.js
 const Models = require("../models");
 const { User } = Models;
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const { sequelize } = require("../models/index");
 dotenv.config();
 
-const { register } = require("../controllers/v1/user.controller");
-
 beforeAll(async () => {
+  client.disconnect();
   await sequelize.authenticate();
   await sequelize.sync({ force: true }); // Sync the models with the test database
 });
@@ -22,8 +20,13 @@ afterAll(async () => {
 
 describe("POST /api/v1/user/register", () => {
   let server;
+  
   beforeEach(() => {
     server = app.listen();
+  });
+
+  afterEach(() => {
+    server.close();
   });
 
   it("should create a new user", async () => {
@@ -73,10 +76,14 @@ describe("POST /api/v1/user/register", () => {
 });
 
 describe('Login', () => {
-
   let server;
+
   beforeEach(() => {
     server = app.listen();
+  });
+
+  afterEach(() => {
+    server.close();
   });
 
   it("should create a new user", async () => {

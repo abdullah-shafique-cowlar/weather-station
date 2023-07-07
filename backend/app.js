@@ -65,4 +65,4 @@ app.all("*", (req, res, next) => {
   res.status(404).json({ Error: `Cant Find ${req.originalUrl}` }); // 404 Not Found
 });
 
-module.exports = app;
+module.exports = {app, client};

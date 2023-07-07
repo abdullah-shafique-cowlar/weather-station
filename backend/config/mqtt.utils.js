@@ -15,9 +15,9 @@ function connect() {
   });
 }
 
-function disconnect() {
+async function disconnect() {
   if (client) {
-    client.end();
+    await client.end();
   }
 }
 
