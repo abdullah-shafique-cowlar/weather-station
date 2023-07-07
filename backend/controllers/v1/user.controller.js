@@ -31,7 +31,7 @@ exports.register = async (req, res, next) => {
     };
 
     const createdUser = await User.create(newUser);
-    res.status(201).json(createdUser);
+    return res.status(201).json(createdUser);
   } catch (error) {
     console.log("Error:", error);
     res.status(500).json({ error: "An error occurred" });
@@ -54,9 +54,9 @@ exports.login = async (req, res, next) => {
       );
 
       res.cookie('jwt', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
-      res.status(200).json({ msg: "login success", token: token });
+      return res.status(200).json({ msg: "login success", token: token });
     } else {
-      res.status(400).json({ error: "Password Incorrect" });
+      return res.status(400).json({ error: "Password Incorrect" });
     }
   } else {
     res.status(404).json({ error: "User does not exist" });
@@ -69,7 +69,7 @@ exports.profile = async (req, res, next) => {
     attributes: { exclude: ["password"] },
   });
   if (user === null) {
-    res.status(404).json({ msg: "User not found" });
+    return res.status(404).json({ msg: "User not found" });
   }
   res.status(200).json(user);
 }
@@ -77,4 +77,97 @@ exports.profile = async (req, res, next) => {
 exports.logout = async (req, res, next) => {
   res.cookie('jwt', '', { maxAge: 0 });
   res.status(200).json({ msg: "User logged out" });
+}
+
+exports.getAllUsers = async (req, res, next) => {
+  let user = await User.findAll({
+    attributes: { exclude: ["password"] },
+  });
+  if (user === null) {
+      return res.status(404).json({ msg: 'Users not found' });
+  }
+
+  res.status(200).json(user);
+}
+
+exports.getOneUser = async (req, res, next) => {
+  const { search } = req.query;
+
+  let user = null;
+
+  if (search) {
+    user = await User.findOne({
+      where: {
+        [Op.or]: [
+          { user_name: search },
+          { email: search }
+        ]
+      }
+    });
+  }
+
+  if (user === null) {
+      return res.status(404).json({ msg: 'User not found' });
+  }
+
+  res.status(200).json(user);
+}
+
+exports.updateUser = async (req, res, next) => {
+  try {
+    const { id, user_name="", email="", password } = req.body;
+    const { search } = req.query;
+
+    const existingUser = await User.findOne({
+      where: {
+        [Op.or]: [{ user_name }, { email }],
+      }
+    });
+
+    if (existingUser) {
+      // User or email already exists
+      return res.status(400).json({ error: 'Username or email already exists' });
+    }
+
+    let user = null;
+  
+    if (search) {
+      user = await User.findOne({
+        where: {
+          [Op.or]: [
+            { user_name: search },
+            { email: search }
+          ]
+        }
+      });
+    }  
+
+    console.log(user)
+
+    if (user) {
+      let updatedFields = {};
+
+      if(user_name){
+        updatedFields.user_name = user_name;
+      }
+
+      if(email){
+        updatedFields.email = email;
+      }
+
+      if (password) {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        updatedFields.password = hashedPassword;
+      }
+
+      const updatedUser = await user.update(updatedFields);
+      return res.status(200).json(updatedUser);
+    } else {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+  } catch (error) {
+    console.log("Error:", error);
+    res.status(500).json({ error: "An error occurred" });
+  }
 }
