@@ -11,6 +11,7 @@
     "author": "Abdullah",
     "license": "ISC",
     "dependencies": {
+        "@influxdata/influxdb-client": "^1.33.2",
         "axios": "^1.2.1",
         "bcrypt": "^5.1.0",
         "cookie-parser": "^1.4.6",

@@ -1,18 +1,23 @@
-const influx_client = require("../../config/db.utils").getClient();
+const influx_client = require("../../config/db.utils")
 const config = require('../../config/env.config')
-const measurement = config.influxdb.measurement
+const { queryClient } = require('../../config/db.utils')
+const measurement = config.influxdb.INFLUX_MEASUREMENT
 
 exports.getAllData = async (req, res, next) => {
   try {
-    const limit = req.params.limit || 0;
-    const result = await influx_client.query(`
-            select * from ${measurement}
-            limit ${limit}
-        `);
-    // console.table(result);
-    res.send(result);
+    const query = `from(bucket: "${config.influxdb.INFLUX_BUCKET}")
+    |> range(start: 0)
+    |> filter(fn: (r) => r._measurement == "${config.influxdb.INFLUX_MEASUREMENT}")`
+  
+    queryClient.collectRows(query).then((results) =>{
+      res.send(results);
+    }).catch((err) =>{
+      console.log("[-] Error: ", err);
+      res.status(500).json({ error: 'An error occurred while executing the query' });
+    })
   } catch (error) {
-    console.log("Error");
+    console.log("[-] Error: ", error);
+    res.status(500).json({ error: 'An error occurred while executing the query' });
   }
 };
 
