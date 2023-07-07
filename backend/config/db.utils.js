@@ -1,16 +1,15 @@
-const influx = require('influx')
 const config = require('./env.config');
+const {InfluxDB, Point} = require('@influxdata/influxdb-client')
 
-const client = new influx.InfluxDB({
-    database: config.influxdb.INFLUX_DATABASE,
-    host: config.influxdb.INFLUXDB_HOST,
-    username: config.influxdb.INFLUXDB_USERNAME,
-    password: config.influxdb.INFLUXDB_PASS,
-    port: 8086
-})
+let url = config.influxdb.INFLUXDB_HOST + ":" + config.influxdb.INFLUX_PORT
+let token = config.influxdb.INFLUX_TOKEN
 
-const getClient = () => {
-    return client;
+const client = new InfluxDB({url, token})
+let writeClient = client.getWriteApi(config.influxdb.INFLUX_ORG, config.influxdb.INFLUX_BUCKET, 'ns')
+let queryClient = client.getQueryApi(config.influxdb.INFLUX_ORG)
+
+module.exports = {
+    client,
+    writeClient,
+    queryClient
 }
-
-module.exports.getClient = getClient;
