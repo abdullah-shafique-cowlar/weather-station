@@ -29,6 +29,9 @@ router.get("/all", userController.getAllUsers);
 // Get single user based on either username or email, Query params (?search=)
 router.get("/getone", userController.getOneUser);
 
+// Update single user based on either username or email
+router.patch("/update", validator(userSchema.update), userController.updateUser);
+
 // POST Logout user
 router.post("/logout", userController.logout);
 
