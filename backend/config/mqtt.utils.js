@@ -1,5 +1,5 @@
 const mqtt = require('mqtt');
-const topicName = 'Weather_Data';
+const config = require('./env.config');
 
 let client;
 // Another free public broker server address: mqtt://test.mosquitto.org/
@@ -7,7 +7,7 @@ function connect() {
   client = mqtt.connect('mqtt://broker.hivemq.com');
 
   client.on('connect', () => {
-    client.subscribe(topicName, { qos: 2 }, (err, granted) => {
+    client.subscribe(config.influxdb.TOPIC, { qos: 2 }, (err, granted) => {
       if (err) {
         console.error(err);
       }
@@ -25,5 +25,4 @@ module.exports = {
   connect,
   disconnect,
   getClient: () => client,
-  topicName
 };

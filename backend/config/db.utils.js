@@ -1,12 +1,11 @@
 const influx = require('influx')
-const env = process.env.NODE_ENV || 'development';
-const config = require('../config/sensor.config.json')[env];
+const config = require('./env.config');
 
 const client = new influx.InfluxDB({
-    database: config.INFLUX_DATABASE,
-    host: config.INFLUXDB_HOST,
-    username: config.INFLUXDB_USERNAME,
-    password: config.INFLUXDB_PASS,
+    database: config.influxdb.INFLUX_DATABASE,
+    host: config.influxdb.INFLUXDB_HOST,
+    username: config.influxdb.INFLUXDB_USERNAME,
+    password: config.influxdb.INFLUXDB_PASS,
     port: 8086
 })
 

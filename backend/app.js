@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const influx_client = require("./config/db.utils").getClient();
 const client = require('./config/mqtt.utils')
+const config = require('./config/env.config')
 require("dotenv").config();
 
 client.connect();
@@ -33,7 +34,7 @@ mqttClient.on("message", async (topic, message, packet) => {
   if (packet.retain === true) {
     return;
   }
-  if (topic === client.topicName) {
+  if (topic === config.influxdb.TOPIC) {
     const payload = JSON.parse(message);
     const temperature = payload.temperature;
     const humidity = payload.humidity;
