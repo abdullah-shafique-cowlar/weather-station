@@ -2,9 +2,10 @@ var express = require("express");
 var logger = require("morgan");
 const cookieParser = require('cookie-parser');
 const cors = require("cors");
-const influx_client = require("./config/db.utils").getClient();
+const {writeClient} = require("./config/db.utils");
 const client = require('./config/mqtt.utils')
 const config = require('./config/env.config')
+const {Point} = require('@influxdata/influxdb-client')
 require("dotenv").config();
 
 client.connect();
@@ -29,7 +30,6 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 app.use(logger("dev"));
 app.use(cookieParser());
 
-// On Message receive event, write to InfluxDB
 mqttClient.on("message", async (topic, message, packet) => {
   if (packet.retain === true) {
     return;
@@ -41,16 +41,15 @@ mqttClient.on("message", async (topic, message, packet) => {
     console.debug("Temperature:", temperature);
     console.debug("Humidity:", humidity);
 
-    // write to influx db on weather_data measurement
     try {
-      const dataPoint = {
-        measurement: "weather_data",
-        tags: { host: "localhost" },
-        fields: { temperature: temperature, humidity: humidity },
-      };
+      let point = new Point(config.influxdb.INFLUX_MEASUREMENT)
+      .tag('host', 'localhost')
+      .floatField('temperature', temperature)
+      .floatField('humidity', humidity)
 
-      await influx_client.writePoints([dataPoint]);
-      console.debug("[+] Point Written: ", dataPoint);
+      writeClient.writePoint(point)
+      console.debug("[+] Point Written: ", point);
+      writeClient.flush()
     } catch (error) {
         console.debug("[-] Error: ", error);
     }
