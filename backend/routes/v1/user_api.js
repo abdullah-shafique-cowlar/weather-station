@@ -23,6 +23,12 @@ router.post("/login", validator(userSchema.login), userController.login);
 // GET user's profile
 router.get("/me", jwtVerify, userController.profile);
 
+// GET all users
+router.get("/all", userController.getAllUsers);
+
+// Get single user based on either username or email, Query params (?search=)
+router.get("/getone", userController.getOneUser);
+
 // POST Logout user
 router.post("/logout", userController.logout);
 
