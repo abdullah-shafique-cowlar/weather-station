@@ -171,3 +171,24 @@ exports.updateUser = async (req, res, next) => {
     res.status(500).json({ error: "An error occurred" });
   }
 }
+
+exports.delUser = async (req, res, next) => {
+  const { user_name="", email="" } = req.body;
+  try {
+    const existingUser = await User.findOne({
+      where: {
+        [Op.or]: [{ user_name }, { email }]
+      }
+    });
+  
+    if(!existingUser){
+      return res.status(404).json({ msg: 'User not found' });
+    }
+  
+    const deletedUser = await existingUser.destroy();
+    return res.status(200).json(deletedUser);
+  } catch (error) {
+    console.log("Error:", error);
+    res.status(500).json({ error: "An error occurred" });
+  }
+}
