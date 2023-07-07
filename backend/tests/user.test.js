@@ -186,3 +186,149 @@ describe('Profile', () => {
     expect(response.body).toEqual({ msg: 'Couldnt Authenticate' });
   });
 });
+
+describe('Get Users from db', () => {
+  let server;
+  let username = "testuser";
+  let email = "test@example.com";
+
+  beforeAll(async () => {
+    // Create a new user and obtain the token for authentication
+    const user = {
+      user_name: username,
+      email: email,
+      password: bcrypt.hashSync('password', 10),
+    };
+
+    await User.create(user);
+  });
+
+  beforeEach(() => {
+    server = app.listen();
+  });
+
+  afterEach(() => {
+    server.close();
+  });
+
+  it('should return all the users in db', async () => {
+    const response = await request(server)
+      .get('/api/v1/user/all')
+      .expect(200);
+
+    expect(response.body).not.toHaveLength(0)
+  });
+
+  it('should return single user from db by username', async () => {
+    const response = await request(server)
+      .get('/api/v1/user/getone?search='+username)
+      .expect(200);
+
+    expect(response.body.user_name).toEqual(username);
+  });
+
+  it('should return single user from db by email', async () => {
+    const response = await request(server)
+      .get('/api/v1/user/getone?search='+email)
+      .expect(200);
+
+    expect(response.body.email).toEqual(email);
+  });
+
+});
+
+describe('Update user in db', () => {
+  let server;
+  let username = "testuser";
+  let email = "test@example.com";
+
+  beforeAll(async () => {
+    // Create a new user and obtain the token for authentication
+    const user = {
+      user_name: username,
+      email: email,
+      password: bcrypt.hashSync('password', 10),
+    };
+
+    await User.create(user);
+  });
+
+  beforeEach(() => {
+    server = app.listen();
+  });
+
+  afterEach(() => {
+    server.close();
+  });
+
+  it('should update users username', async () => {
+    const response = await request(server)
+      .patch('/api/v1/user/update?search='+username)
+      .send({user_name: "newTestUser"})
+      .expect(200);
+
+    expect(response.body.user_name).toEqual('newTestUser');
+  });
+
+  it('should update users email', async () => {
+    const response = await request(server)
+      .patch('/api/v1/user/update?search='+email)
+      .send({email: 'newtestuser@example.com'})
+      .expect(200);
+
+    expect(response.body.email).toEqual("newtestuser@example.com");
+  });
+
+  it('should update users password', async () => {
+    const response = await request(server)
+      .patch('/api/v1/user/update?search='+"newTestUser")
+      .send({password: 'password123'})
+      .expect(200);
+
+    expect(await bcrypt.compare('password123', response.body.password)).toBe(true);
+  });
+
+});
+
+describe('Delete user in db', () => {
+  let server;
+  let username = "testuser";
+  let email = "test@example.com";
+
+  beforeAll(async () => {
+    // Create a new user and obtain the token for authentication
+    const user = {
+      user_name: username,
+      email: email,
+      password: bcrypt.hashSync('password', 10),
+    };
+
+    await User.create(user);
+  });
+
+  beforeEach(() => {
+    server = app.listen();
+  });
+
+  afterEach(() => {
+    server.close();
+  });
+
+  it('should delete user by username', async () => {
+    const response = await request(server)
+      .delete('/api/v1/user/delete')
+      .send({user_name: username})
+      .expect(200);
+
+    expect(response.body.user_name).toEqual(username);
+  });
+
+  it('should delete user by email', async () => {
+    const response = await request(server)
+      .delete('/api/v1/user/delete')
+      .send({email: email})
+      .expect(200);
+
+    expect(response.body.email).toEqual(email);
+  });
+});
